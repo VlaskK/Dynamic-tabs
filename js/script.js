@@ -5,11 +5,15 @@ window.addEventListener('DOMContentLoaded', ()=>{
           tabsContent = document.querySelectorAll('.tabcontent'),
           tabsParent = document.querySelector(".tabheader__items");
     function hideTabContent(){
-        tabsContent.forEach((tab) => {tab.style.display = "none";}); 
+        tabsContent.forEach((tab) => {
+            tab.classList.add('hide');
+            tab.classList.remove('show', 'fade');
+        }); 
         tabs.forEach(tab => {tab.classList.remove('tabheader__item_active');}); //убираем  табы 
     }  
     function showTabContent(i = 0){
-        tabsContent[i].style.display = "block"; 
+        tabsContent[i].classList.add('show', 'fade'); 
+        tabsContent[i].classList.remove('hide'); 
         tabs[i].classList.add('tabheader__item_active'); // возвращаемтаб
     }
 
