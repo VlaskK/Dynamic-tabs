@@ -5,12 +5,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
           tabsContent = document.querySelectorAll('.tabcontent'),
           tabsParent = document.querySelector(".tabheader__items");
     function hideTabContent(){
-        tabsContent.forEach((tab) => {tab.style.display = "none";}); //убираем все стили табов
-        tabs.forEach(tab => {tab.classList.remove('tabheader__item_active');}); //убираем сами табы 
+        tabsContent.forEach((tab) => {tab.style.display = "none";}); 
+        tabs.forEach(tab => {tab.classList.remove('tabheader__item_active');}); //убираем  табы 
     }  
     function showTabContent(i = 0){
-        tabsContent[i].style.display = "block"; //возвращаем стиль у определенного таба 
-        tabs[i].classList.add('tabheader__item_active'); // возвращаем сам таб
+        tabsContent[i].style.display = "block"; 
+        tabs[i].classList.add('tabheader__item_active'); // возвращаемтаб
     }
 
     tabsParent.addEventListener('click', (e)=> {
@@ -77,4 +77,38 @@ window.addEventListener('DOMContentLoaded', ()=>{
         }
     }
     setClock('.timer', deadline);
+
+    // Modal window
+
+    const modalTrigger = document.querySelectorAll('[data-modal]'), //кнопка с которой модальное окно откроется
+          modal = document.querySelector('.modal'), // родитель
+          modalCloseBtn = document.querySelector('[data-close]'); // кнопка закрытия окна 
+    
+    function closeModel(){ 
+        modal.classList.add('hide');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    
+    modalTrigger.forEach( item => {
+        item.addEventListener('click', () => { // окно открывается по клику. 
+            modal.classList.add('show'); 
+            modal.classList.remove('hide');
+            document.body.style.overflow = 'hidden'; //чтобы не двигался скрол, когда модальное окно открыто 
+        });
+    });
+    modalCloseBtn.addEventListener('click', closeModel); 
+
+    modal.addEventListener('click', (e) => { // чтоб закрывалась при нажатии за границы
+        if (e.target === modal){
+            closeModel();
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => { //закрытие на ESC
+        if (e.code === 'Escape' && modal.classList.contains('show')){
+            closeModel();
+        }
+    });
+
 });
