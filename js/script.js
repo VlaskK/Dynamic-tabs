@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     showTabContent();
 
     //Timer
-    const deadline = '2021-09-06';
+    const deadline = '2021-09-30';
     function getTimeRemaining(endtime){
         const t = Date.parse(endtime) - Date.parse(new Date()), //time difference
               days = Math.floor(t / (1000 * 60 * 60 * 60 * 24)),
@@ -93,12 +93,17 @@ window.addEventListener('DOMContentLoaded', ()=>{
         modal.classList.remove('show');
         document.body.style.overflow = '';
     }
+
+    function openModel(){
+        modal.classList.add('show'); 
+        modal.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId);// если окно уже открывалось, то завершить интервал
+    }
     
     modalTrigger.forEach( item => {
         item.addEventListener('click', () => { // окно открывается по клику. 
-            modal.classList.add('show'); 
-            modal.classList.remove('hide');
-            document.body.style.overflow = 'hidden'; //чтобы не двигался скрол, когда модальное окно открыто 
+            openModel(); //чтобы не двигался скрол, когда модальное окно открыто 
         });
     });
     modalCloseBtn.addEventListener('click', closeModel); 
@@ -114,5 +119,14 @@ window.addEventListener('DOMContentLoaded', ()=>{
             closeModel();
         }
     });
+    const modalTimerId = setTimeout(openModel, 5000); // открыть модальное окно через 5 секунд
 
+    function showModalByScroll(){
+        if (window.pageYOffset + document.documentElement.clientHeight >= 
+            document.documentElement.scrollHeight){
+                openModel();
+                window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+    window.addEventListener('scroll', showModalByScroll);
 });
