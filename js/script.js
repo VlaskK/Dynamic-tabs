@@ -1,7 +1,7 @@
 "use strict"
 
 class MenuCard {   //класс карточки меню 
-    constructor(src, alt, title, descr, price, parentSelector){
+    constructor(src, alt, title, descr, price, parentSelector, ...classes){
         this.src = src;
         this.alt = alt;
         this.title = title;
@@ -9,6 +9,7 @@ class MenuCard {   //класс карточки меню
         this.price = price; 
         this.parentSelector = document.querySelector(parentSelector);
         this.transfer = 27;
+        this.classes = classes;
     }
 
     changeToUAH(){
@@ -17,8 +18,14 @@ class MenuCard {   //класс карточки меню
     render(){
         this.changeToUAH();
         const element = document.createElement('div');
+        this.classes.forEach(c => element.classList.add(c));
+
+        if (this.classes.length === 0){
+            this.element = "menu__item";
+            element.classList.add(this.element);
+        }
+
         element.innerHTML = `
-        <div class="menu__item">
             <img src=${this.src} alt=${this.alt}>
             <h3 class="menu__item-subtitle">${this.title}"</h3>
             <div class="menu__item-descr">${this.descr}</div>
@@ -27,7 +34,6 @@ class MenuCard {   //класс карточки меню
                 <div class="menu__item-cost">Цена:</div>
                 <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
             </div>
-        </div>
         `;
         this.parentSelector.append(element);
     }
@@ -80,7 +86,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
     tabsParent.addEventListener('click', (e)=> {
         const target = e.target;
-
         if (target && target.classList.contains('tabheader__item')){
             tabs.forEach((item, i) => {
                 if (target == item){
@@ -190,6 +195,57 @@ window.addEventListener('DOMContentLoaded', ()=>{
         }
     }
     window.addEventListener('scroll', showModalByScroll); //Если скролим то выполняем функцию
-});
 
+    //Forms
+
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'loading...',
+        succes: 'Спасибо! Мы с вами свяжемся',
+        failure: 'Что-то пошло не так'
+    };
+
+    forms.forEach((item => postData(item)));
+
+    function postData(form){
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const request = new XMLHttpRequest();
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            request.open('POST', "server.php");
+
+
+            const formData = new FormData(form);
+
+            const obj = {};
+
+            formData.forEach((value, key) => {
+                obj[key] = value;
+            });
+
+            const json = JSON.stringify(obj);
+
+            request.setRequestHeader('Content-type','application/json');
+
+            request.send(json);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200){
+                    console.log(request.response);
+
+                    statusMessage.textContent = message.succes;
+                    const t = setInterval(() => statusMessage.remove(), 3000);
+                    form.reset();
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
+});
 
