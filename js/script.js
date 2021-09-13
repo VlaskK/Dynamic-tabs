@@ -19,7 +19,7 @@ class MenuCard {   //класс карточки меню
         this.changeToUAH();
         const element = document.createElement('div');
         this.classes.forEach(c => element.classList.add(c));
-
+        
         if (this.classes.length === 0){
             this.element = "menu__item";
             element.classList.add(this.element);
@@ -151,16 +151,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
     // Modal window
 
     const modalTrigger = document.querySelectorAll('[data-modal]'), //кнопка с которой модальное окно откроется
-          modal = document.querySelector('.modal'), // родитель
-          modalCloseBtn = document.querySelector('[data-close]'); // кнопка закрытия окна 
+          modal = document.querySelector('.modal'); // родитель
+          //modalCloseBtn = document.querySelector('[data-close]'); // кнопка закрытия окна 
     
-    function closeModel(){ 
+    function closeModal(){ 
         modal.classList.add('hide');
         modal.classList.remove('show');
         document.body.style.overflow = '';
     }
 
-    function openModel(){
+    function openModal(){
         modal.classList.add('show'); 
         modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
@@ -169,28 +169,28 @@ window.addEventListener('DOMContentLoaded', ()=>{
     
     modalTrigger.forEach( item => {
         item.addEventListener('click', () => { // окно открывается по клику. 
-            openModel(); //чтобы не двигался скрол, когда модальное окно открыто 
+            openModal(); //чтобы не двигался скрол, когда модальное окно открыто 
         });
     });
-    modalCloseBtn.addEventListener('click', closeModel); 
+    //modalCloseBtn.addEventListener('click', closeModel); 
 
     modal.addEventListener('click', (e) => { // чтоб закрывалась при нажатии за границы
-        if (e.target === modal){
-            closeModel();
+        if (e.target === modal || e.target.getAttribute('data-close') == ''){
+            closeModal();
         }
     });
     
     document.addEventListener('keydown', (e) => { //закрытие на ESC
         if (e.code === 'Escape' && modal.classList.contains('show')){
-            closeModel();
+            closeModal();
         }
     });
-    const modalTimerId = setTimeout(openModel, 5000); // открыть модальное окно через 5 секунд
+    const modalTimerId = setTimeout(openModal, 5000); // открыть модальное окно через 5 секунд
 
     function showModalByScroll(){
         if (window.pageYOffset + document.documentElement.clientHeight >=  //Если число прокрутили до конца страницы
             document.documentElement.scrollHeight){
-                openModel(); 
+                openModal(); 
                 window.removeEventListener('scroll', showModalByScroll); //открыть окно и удалить событие
         }
     }
@@ -201,7 +201,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     const forms = document.querySelectorAll('form');
 
     const message = {
-        loading: 'loading...',
+        loading: 'img/form/spinner.svg',
         succes: 'Спасибо! Мы с вами свяжемся',
         failure: 'Что-то пошло не так'
     };
@@ -212,9 +212,13 @@ window.addEventListener('DOMContentLoaded', ()=>{
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const request = new XMLHttpRequest();
-            const statusMessage = document.createElement('div');
-            statusMessage.classList.add('status');
-            statusMessage.textContent = message.loading;
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.textContent = message.loading; //HERE LOAD
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
             form.append(statusMessage);
 
             request.open('POST', "server.php");
@@ -238,14 +242,41 @@ window.addEventListener('DOMContentLoaded', ()=>{
                 if (request.status === 200){
                     console.log(request.response);
 
-                    statusMessage.textContent = message.succes;
+                    //statusMessage.textContent = message.succes;
+                    showThanksModal(message.succes);
                     const t = setInterval(() => statusMessage.remove(), 3000);
                     form.reset();
                 } else {
-                    statusMessage.textContent = message.failure;
+                    //statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
+                    const t = setInterval(() => statusMessage.remove(), 3000);
                 }
             });
         });
+    }
+
+
+    function showThanksModal(message){
+        const prevModal = document.querySelector('.modal__dialog');
+
+        prevModal.classList.add('hide');
+        openModal();
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal_close" data-close>×</div>
+            <div class="modal__title">${message}</div>
+        </div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModal.classList.add('show');
+            prevModal.classList.remove('hide');
+            closeModal();
+        },4000);
     }
 });
 
