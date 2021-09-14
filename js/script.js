@@ -211,7 +211,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
     function postData(form){
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const request = new XMLHttpRequest();
+            //const request = new XMLHttpRequest();
+
             const statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
             statusMessage.textContent = message.loading; //HERE LOAD
@@ -219,13 +220,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
                 display: block;
                 margin: 0 auto;
             `;
-            form.append(statusMessage);
-
-            request.open('POST', "server.php");
-
-
+            form.insertAdjacentElement('afterend', statusMessage);
+            
             const formData = new FormData(form);
-
+        
             const obj = {};
 
             formData.forEach((value, key) => {
@@ -233,24 +231,24 @@ window.addEventListener('DOMContentLoaded', ()=>{
             });
 
             const json = JSON.stringify(obj);
-
-            request.setRequestHeader('Content-type','application/json');
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200){
-                    console.log(request.response);
-
-                    //statusMessage.textContent = message.succes;
-                    showThanksModal(message.succes);
-                    const t = setInterval(() => statusMessage.remove(), 3000);
-                    form.reset();
-                } else {
-                    //statusMessage.textContent = message.failure;
-                    showThanksModal(message.failure);
-                    const t = setInterval(() => statusMessage.remove(), 3000);
-                }
+            
+            fetch('server.php', {
+                method: "POST",
+                headers: {
+                    'Content-type':'application/json'
+                },
+                body: json
+            })
+            .then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.succes);
+                statusMessage.remove();
+            }).catch(() => {
+                showThanksModal(message.failure);
+                const t = setInterval(() => statusMessage.remove(), 3000);
+            }).finally(() => {
+                form.reset();
             });
         });
     }
